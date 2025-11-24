@@ -1,12 +1,12 @@
 import streamlit as st
 import google.generativeai as genai
-import time # Klavye efekti için gerekli kütüphane
+import time
 
 # --- RENK PALETİ ---
 PRIMARY_COLOR = "#4A6B4A"   # Koyu Yeşil
 BG_COLOR_LIGHT = "#E3F0E3"  # Açık Yeşil
 BG_COLOR_WHITE = "#FFFFFF"  # Beyaz
-TEXT_COLOR_MAIN = "#1A2B1A" # Koyu Metin Rengi
+TEXT_COLOR_MAIN = "#1A2B1A" # Koyu Metin
 
 # --- SAYFA AYARLARI ---
 st.set_page_config(
@@ -24,24 +24,18 @@ st.markdown(f"""
         color: {TEXT_COLOR_MAIN};
     }}
     
-    /* 2. TÜM YAZILARI KOYU YAP */
+    /* 2. YAZILARI KOYU YAP */
     p, span, div, li {{
         color: {TEXT_COLOR_MAIN} !important;
     }}
     
     /* 3. BAŞLIKLAR */
-    h1, h2, h3, h4, h5, h6 {{
+    h1, h2, h3 {{
         color: {PRIMARY_COLOR} !important;
         font-family: 'Helvetica', sans-serif;
     }}
-    
-    /* 4. SIDEBAR DÜZENİ */
-    section[data-testid="stSidebar"] {{
-        background-color: {BG_COLOR_LIGHT};
-        border-right: 2px solid #CADBCA;
-    }}
-    
-    /* 5. SOHBET KUTUSU */
+
+    /* 4. SOHBET KUTUSU */
     .stChatMessage {{
         background-color: {BG_COLOR_WHITE};
         border-radius: 15px;
@@ -50,37 +44,51 @@ st.markdown(f"""
         border: 1px solid #CADBCA;
     }}
     
-    /* 6. LİNKLER VE BUTONLAR */
-    a {{ color: {PRIMARY_COLOR} !important; text-decoration: none; font-weight: bold; }}
-    button[kind="secondary"] {{ background-color: {PRIMARY_COLOR} !important; color: white !important; border: none !important; }}
-    button[kind="secondary"] p {{ color: white !important; }}
-    
+    /* 5. GİZLİ ÜST MENÜ */
     header[data-testid="stHeader"] {{ background-color: transparent; }}
+    
+    /* 6. LINKLER */
+    a {{
+        text-decoration: none;
+        transition: opacity 0.3s;
+    }}
+    a:hover {{
+        opacity: 0.8;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- BAŞLIK ---
-# "Yusuf AI" yerine daha havalı olan "Nexa" ismini kullandım.
-st.markdown(f"<h1 style='text-align: center; color: {PRIMARY_COLOR};'>🌿 Nexa - Yusuf'un Dijital Asistanı</h1>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align: center; font-size: 1.1em; color: {TEXT_COLOR_MAIN};'>Ben Nexa. Yusuf'un teknik yetkinlikleri ve projeleri hakkında her şeyi bana sorabilirsin.</p>", unsafe_allow_html=True)
-st.divider()
+# --- BAŞLIK VE AÇIKLAMA ---
+st.markdown(f"<h1 style='text-align: center; color: {PRIMARY_COLOR}; margin-bottom: 0px;'>🌿 Nexa - Yusuf'un Dijital Asistanı</h1>", unsafe_allow_html=True)
+st.markdown(f"<p style='text-align: center; font-size: 1.1em; margin-top: 10px;'>Ben Nexa. Yusuf'un teknik yetkinlikleri ve projeleri hakkında her şeyi bana sorabilirsin.</p>", unsafe_allow_html=True)
 
-# --- YAN MENÜ ---
-with st.sidebar:
-    st.write("# 👨‍💻 Profil") 
-    st.write("**Yusuf Can Aydın**")
-    st.write("📍 Kalıp Tasarımcısı & Teknik Ressam")
-    st.write("🏢 Farplas")
-    st.divider()
-    st.write("### 📬 İletişim")
-    st.write("📧 yca4134@gmail.com")
-    # Senin yeşil rengine (#4A6B4A) boyanmış resmi LinkedIn butonu
-    linkedin_url = "https://www.linkedin.com/in/yusuf-can-ayd%C4%B1n-138389194"
-    st.markdown(f"""
-    <a href="{linkedin_url}" target="_blank">
-        <img src="https://img.shields.io/badge/LinkedIn-4A6B4A?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Profilim" style="width: 100%; border-radius: 5px;">
+# --- İLETİŞİM LİNKLERİ (HEADER KISMI) ---
+# Gmail ve LinkedIn'i yan yana ortalayarak koyuyoruz
+email_address = "yca4134@gmail.com"
+linkedin_url = "https://www.linkedin.com/in/yusuf-can-ayd%C4%B1n-138389194"
+
+st.markdown(f"""
+<div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 30px;">
+    <a href="mailto:{email_address}" style="
+        background-color: {BG_COLOR_WHITE}; 
+        color: {PRIMARY_COLOR}; 
+        padding: 8px 15px; 
+        border-radius: 5px; 
+        border: 1px solid {PRIMARY_COLOR}; 
+        font-weight: bold; 
+        display: flex; 
+        align-items: center; 
+        gap: 8px;">
+        📧 {email_address}
     </a>
-    """, unsafe_allow_html=True)
+
+    <a href="{linkedin_url}" target="_blank" style="display: flex; align-items: center;">
+        <img src="https://img.shields.io/badge/LinkedIn-4A6B4A?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" style="height: 38px; border-radius: 4px;">
+    </a>
+</div>
+""", unsafe_allow_html=True)
+
+st.divider()
 
 # --- GEMINI MODEL AYARLARI ---
 try:
@@ -89,9 +97,9 @@ except:
     st.error("⚠️ API Anahtarı bulunamadı!")
     st.stop()
 
-# İsim burada da güncellendi: "Nexa"
+# Nexa Karakteri
 system_prompt = """
-Sen Yusuf Can Aydın'ın kişisel web sitesindeki yapay zeka asistanısın. Adın "YCA Bot".
+Sen Yusuf Can Aydın'ın kişisel web sitesindeki yapay zeka asistanısın. Adın "Nexa".
 İsmin Siemens NX yazılımına ve teknolojiye bir göndermedir.
 Ziyaretçiler sana Yusuf'un kariyeri, projeleri ve yetenekleri hakkında sorular soracak.
 Senin görevin, Yusuf'u profesyonel, yetkin ve samimi bir dille temsil etmektir.
@@ -123,33 +131,29 @@ model = genai.GenerativeModel(
     system_instruction=system_prompt
 )
 
-# --- KLAVYE EFEKTİ FONKSİYONU ---
+# --- KLAVYE EFEKTİ ---
 def stream_data(text):
     for word in text.split(" "):
         yield word + " "
-        time.sleep(0.05) # Yazma hızı (Düşürürsen hızlanır)
+        time.sleep(0.05)
 
 # --- SOHBET ARAYÜZÜ ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Geçmiş mesajları göster
+# Mesajları göster
 for message in st.session_state.messages:
     avatar = "🧑‍💻" if message["role"] == "user" else "🌿"
     with st.chat_message(message["role"], avatar=avatar):
         st.write(message["content"])
 
-# KULLANICI GİRİŞİ VE CEVAP ALANI
+# Giriş Alanı
 if user_input := st.chat_input("Nexa'ya sor... (Örn: Yusuf hangi programları kullanıyor?)"):
-    
-    # 1. Kullanıcı mesajını ekle
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user", avatar="🧑‍💻"):
         st.write(user_input)
 
-    # 2. Cevabı üret ve KLAVYE EFEKTİYLE yaz
     try:
-        # Sohbet geçmişini modele ver
         chat = model.start_chat(history=[
             {"role": m["role"], "parts": [m["content"]]} 
             for m in st.session_state.messages[:-1]
@@ -158,12 +162,9 @@ if user_input := st.chat_input("Nexa'ya sor... (Örn: Yusuf hangi programları k
         response = chat.send_message(user_input)
         ai_response = response.text
 
-        # BURASI SİHİRLİ KISIM (Klavye Efekti)
         with st.chat_message("assistant", avatar="🌿"):
-            # st.write_stream, metni parça parça ekrana basar
             st.write_stream(stream_data(ai_response))
         
-        # Cevabı hafızaya kaydet
         st.session_state.messages.append({"role": "model", "content": ai_response})
         
     except Exception as e:
