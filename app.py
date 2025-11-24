@@ -2,41 +2,63 @@ import streamlit as st
 import google.generativeai as genai
 
 # --- RENK PALETİ ---
-# Görselden alınan renklerin kodları (Yaklaşık değerler)
 PRIMARY_COLOR = "#4A6B4A"   # Koyu Yeşil (Başlıklar, Butonlar)
 BG_COLOR_LIGHT = "#E3F0E3"  # Açık Yeşil (Genel Arka Plan, Sidebar)
 BG_COLOR_WHITE = "#FFFFFF"  # Beyaz (İçerik Alanı)
-TEXT_COLOR_DARK = "#2E402E" # Koyu Metin Rengi (Okunabilirlik için)
+TEXT_COLOR_MAIN = "#1A2B1A" # Okunabilir Koyu Yeşile Çalan Siyah (DÜZELTİLDİ)
 
-# --- SAYFA AYARLARI VE CSS ---
+# --- SAYFA AYARLARI ---
 st.set_page_config(
     page_title="Yusuf Can Aydın | AI Blog",
     page_icon="🌿",
     layout="wide"
 )
 
-# Özel CSS ile renkleri siteye uyguluyoruz
+# --- DÜZELTİLMİŞ CSS (OKUNABİLİRLİK İÇİN) ---
 st.markdown(f"""
 <style>
-    /* Genel Arka Plan */
+    /* 1. TÜM SAYFA GENELİ */
     .stApp {{
         background-color: {BG_COLOR_LIGHT};
-        color: {TEXT_COLOR_DARK};
     }}
     
-    /* Sidebar (Yan Menü) Arka Planı */
-    section[data-testid="stSidebar"] {{
-        background-color: {BG_COLOR_LIGHT};
-        border-right: 2px solid #CADBCA; /* Hafif bir kenarlık */
+    /* 2. TÜM YAZILARI KOYU YAP (ZORUNLU) */
+    p, span, div, li {{
+        color: {TEXT_COLOR_MAIN} !important;
     }}
     
-    /* Ana Başlıklar (H1, H2, H3) */
-    h1, h2, h3 {{
+    /* 3. BAŞLIKLAR */
+    h1, h2, h3, h4, h5, h6 {{
         color: {PRIMARY_COLOR} !important;
         font-family: 'Helvetica', sans-serif;
     }}
     
-    /* Linkler */
+    /* 4. SIDEBAR (YAN MENÜ) DÜZELTMESİ */
+    section[data-testid="stSidebar"] {{
+        background-color: {BG_COLOR_LIGHT};
+        border-right: 2px solid #CADBCA;
+    }}
+    section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span {{
+        color: {TEXT_COLOR_MAIN} !important;
+    }}
+    section[data-testid="stSidebar"] div {{
+        color: {TEXT_COLOR_MAIN} !important;
+    }}
+
+    /* 5. SOHBET KUTUCUKLARI */
+    .stChatMessage {{
+        background-color: {BG_COLOR_WHITE};
+        border-radius: 15px;
+        padding: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border: 1px solid #CADBCA;
+    }}
+    /* Sohbet Balonu İçindeki Yazılar Kesinlikle Koyu Olsun */
+    .stChatMessage p {{
+        color: {TEXT_COLOR_MAIN} !important;
+    }}
+    
+    /* 6. LİNKLER */
     a {{
         color: {PRIMARY_COLOR} !important;
         text-decoration: none;
@@ -46,44 +68,33 @@ st.markdown(f"""
         text-decoration: underline;
     }}
 
-    /* Streamlit Butonları (Örn: Link Button) */
+    /* 7. BUTONLAR */
     button[kind="secondary"] {{
         background-color: {PRIMARY_COLOR} !important;
-        color: white !important;
+        color: white !important; /* Buton içi yazı beyaz kalsın */
         border: none !important;
     }}
-    button[kind="secondary"]:hover {{
-        background-color: #3A543A !important; /* Biraz daha koyusu */
+    /* Buton içindeki p etiketini beyaz yap (üstteki kuralı ezmek için) */
+    button[kind="secondary"] p {{
+        color: white !important; 
     }}
-
-    /* Sohbet Kutusu Stilleri */
-    .stChatMessage {{
-        background-color: {BG_COLOR_WHITE};
-        border-radius: 15px;
-        padding: 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }}
-    /* Kullanıcı Mesajı Farklı Görünsün */
-    .stChatMessage[data-testid="user-message"] {{
-         background-color: #D0E0D0; /* Açık yeşilin bir tonu */
-    }}
-
-    /* Üstteki Renkli Çizgiyi Kaldır (Opsiyonel) */
+    
+    /* Üst menü çizgisini gizle */
     header[data-testid="stHeader"] {{
         background-color: transparent;
     }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- ANA BAŞLIK ---
-# Başlığı ortalayıp özel renk verelim
+# --- İÇERİK ---
+
+# Başlık
 st.markdown(f"<h1 style='text-align: center; color: {PRIMARY_COLOR};'>🌿 Yusuf Can Aydın - Dijital Asistan</h1>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align: center; font-size: 1.1em;'>Yusuf'un kariyeri ve projeleri hakkında merak ettiklerini yapay zekaya sor.</p>", unsafe_allow_html=True)
+st.markdown(f"<p style='text-align: center; font-size: 1.1em; color: {TEXT_COLOR_MAIN};'>Yusuf'un kariyeri ve projeleri hakkında merak ettiklerini yapay zekaya sor.</p>", unsafe_allow_html=True)
 st.divider()
 
-# --- YAN MENÜ (Sidebar) ---
+# --- YAN MENÜ ---
 with st.sidebar:
-    # Profil Fotoğrafı Yerine İkon
     st.write("# 👨‍💻 Profil") 
     st.write("**Yusuf Can Aydın**")
     st.write("📍 Kalıp Tasarımcısı & Teknik Ressam")
@@ -92,13 +103,12 @@ with st.sidebar:
     
     st.write("### 📬 İletişim")
     st.write("📧 yca4134@gmail.com")
-    # Buton rengi CSS ile ayarlandı
     st.link_button("LinkedIn Profiline Git", "https://www.linkedin.com/in/yusuf-can-ayd%C4%B1n-138389194")
     
     st.divider()
-    st.info("Bu site, sağladığınız renk paleti kullanılarak tasarlanmıştır.")
+    st.info("Bu asistan, özel renk paletiyle tasarlanmıştır.")
 
-# --- GEMINI AYARLARI (Aynı Kalacak) ---
+# --- GEMINI AYARLARI ---
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 except:
@@ -137,27 +147,24 @@ model = genai.GenerativeModel(
     system_instruction=system_prompt
 )
 
-# --- SOHBET ARAYÜZÜ (Aynı Kalacak) ---
+# --- SOHBET ARAYÜZÜ ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Sohbet alanı için beyaz bir konteyner
-chat_container = st.container()
-
-with chat_container:
-    for message in st.session_state.messages:
-        # Mesajın kimden geldiğine göre ikon seçimi
-        avatar = "🧑‍💻" if message["role"] == "user" else "🤖"
-        with st.chat_message(message["role"], avatar=avatar):
-            st.write(message["content"])
+# Mesajları göster
+for message in st.session_state.messages:
+    avatar = "🧑‍💻" if message["role"] == "user" else "🌿"
+    with st.chat_message(message["role"], avatar=avatar):
+        st.write(message["content"])
 
 # Kullanıcı Girişi
-if user_input := st.chat_input("Sorunu buraya yaz... (Örn: Hangi projelerde çalıştı?)"):
-    with chat_container:
-        with st.chat_message("user", avatar="🧑‍💻"):
-            st.write(user_input)
+if user_input := st.chat_input("Sorunu buraya yaz..."):
+    # Mesajı ekle ve göster
     st.session_state.messages.append({"role": "user", "content": user_input})
+    with st.chat_message("user", avatar="🧑‍💻"):
+        st.write(user_input)
 
+    # Cevabı üret
     try:
         chat = model.start_chat(history=[
             {"role": m["role"], "parts": [m["content"]]} 
@@ -166,9 +173,10 @@ if user_input := st.chat_input("Sorunu buraya yaz... (Örn: Hangi projelerde ça
         response = chat.send_message(user_input)
         ai_response = response.text
 
-        with chat_container:
-            with st.chat_message("assistant", avatar="🤖"):
-                st.write(ai_response)
+        # Cevabı göster
+        with st.chat_message("assistant", avatar="🌿"):
+            st.write(ai_response)
+        
         st.session_state.messages.append({"role": "model", "content": ai_response})
         
     except Exception as e:
