@@ -74,7 +74,13 @@ with st.sidebar:
     st.divider()
     st.write("### 📬 İletişim")
     st.write("📧 yca4134@gmail.com")
-    st.link_button("LinkedIn Profiline Git", "https://www.linkedin.com/in/yusuf-can-ayd%C4%B1n-138389194")
+    # Senin yeşil rengine (#4A6B4A) boyanmış resmi LinkedIn butonu
+    linkedin_url = "https://www.linkedin.com/in/yusuf-can-ayd%C4%B1n-138389194"
+    st.markdown(f"""
+    <a href="{linkedin_url}" target="_blank">
+        <img src="https://img.shields.io/badge/LinkedIn-4A6B4A?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Profilim" style="width: 100%; border-radius: 5px;">
+    </a>
+    """, unsafe_allow_html=True)
 
 # --- GEMINI MODEL AYARLARI ---
 try:
