@@ -1,28 +1,30 @@
 import streamlit as st
 import google.generativeai as genai
+import time # Klavye efekti için gerekli kütüphane
 
 # --- RENK PALETİ ---
-PRIMARY_COLOR = "#4A6B4A"   # Koyu Yeşil (Başlıklar, Butonlar)
-BG_COLOR_LIGHT = "#E3F0E3"  # Açık Yeşil (Genel Arka Plan, Sidebar)
-BG_COLOR_WHITE = "#FFFFFF"  # Beyaz (İçerik Alanı)
-TEXT_COLOR_MAIN = "#1A2B1A" # Okunabilir Koyu Yeşile Çalan Siyah (DÜZELTİLDİ)
+PRIMARY_COLOR = "#4A6B4A"   # Koyu Yeşil
+BG_COLOR_LIGHT = "#E3F0E3"  # Açık Yeşil
+BG_COLOR_WHITE = "#FFFFFF"  # Beyaz
+TEXT_COLOR_MAIN = "#1A2B1A" # Koyu Metin Rengi
 
 # --- SAYFA AYARLARI ---
 st.set_page_config(
-    page_title="Yusuf Can Aydın | AI Blog",
+    page_title="Nexa | Dijital Asistan",
     page_icon="🌿",
     layout="wide"
 )
 
-# --- DÜZELTİLMİŞ CSS (OKUNABİLİRLİK İÇİN) ---
+# --- CSS (TASARIM) ---
 st.markdown(f"""
 <style>
     /* 1. TÜM SAYFA GENELİ */
     .stApp {{
         background-color: {BG_COLOR_LIGHT};
+        color: {TEXT_COLOR_MAIN};
     }}
     
-    /* 2. TÜM YAZILARI KOYU YAP (ZORUNLU) */
+    /* 2. TÜM YAZILARI KOYU YAP */
     p, span, div, li {{
         color: {TEXT_COLOR_MAIN} !important;
     }}
@@ -33,19 +35,13 @@ st.markdown(f"""
         font-family: 'Helvetica', sans-serif;
     }}
     
-    /* 4. SIDEBAR (YAN MENÜ) DÜZELTMESİ */
+    /* 4. SIDEBAR DÜZENİ */
     section[data-testid="stSidebar"] {{
         background-color: {BG_COLOR_LIGHT};
         border-right: 2px solid #CADBCA;
     }}
-    section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span {{
-        color: {TEXT_COLOR_MAIN} !important;
-    }}
-    section[data-testid="stSidebar"] div {{
-        color: {TEXT_COLOR_MAIN} !important;
-    }}
-
-    /* 5. SOHBET KUTUCUKLARI */
+    
+    /* 5. SOHBET KUTUSU */
     .stChatMessage {{
         background-color: {BG_COLOR_WHITE};
         border-radius: 15px;
@@ -53,44 +49,20 @@ st.markdown(f"""
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         border: 1px solid #CADBCA;
     }}
-    /* Sohbet Balonu İçindeki Yazılar Kesinlikle Koyu Olsun */
-    .stChatMessage p {{
-        color: {TEXT_COLOR_MAIN} !important;
-    }}
     
-    /* 6. LİNKLER */
-    a {{
-        color: {PRIMARY_COLOR} !important;
-        text-decoration: none;
-        font-weight: bold;
-    }}
-    a:hover {{
-        text-decoration: underline;
-    }}
-
-    /* 7. BUTONLAR */
-    button[kind="secondary"] {{
-        background-color: {PRIMARY_COLOR} !important;
-        color: white !important; /* Buton içi yazı beyaz kalsın */
-        border: none !important;
-    }}
-    /* Buton içindeki p etiketini beyaz yap (üstteki kuralı ezmek için) */
-    button[kind="secondary"] p {{
-        color: white !important; 
-    }}
+    /* 6. LİNKLER VE BUTONLAR */
+    a {{ color: {PRIMARY_COLOR} !important; text-decoration: none; font-weight: bold; }}
+    button[kind="secondary"] {{ background-color: {PRIMARY_COLOR} !important; color: white !important; border: none !important; }}
+    button[kind="secondary"] p {{ color: white !important; }}
     
-    /* Üst menü çizgisini gizle */
-    header[data-testid="stHeader"] {{
-        background-color: transparent;
-    }}
+    header[data-testid="stHeader"] {{ background-color: transparent; }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- İÇERİK ---
-
-# Başlık
-st.markdown(f"<h1 style='text-align: center; color: {PRIMARY_COLOR};'>🌿 Yusuf Can Aydın - Dijital Asistan</h1>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align: center; font-size: 1.1em; color: {TEXT_COLOR_MAIN};'>Yusuf'un kariyeri ve projeleri hakkında merak ettiklerini yapay zekaya sor.</p>", unsafe_allow_html=True)
+# --- BAŞLIK ---
+# "Yusuf AI" yerine daha havalı olan "Nexa" ismini kullandım.
+st.markdown(f"<h1 style='text-align: center; color: {PRIMARY_COLOR};'>🌿 Nexa - Yusuf'un Dijital Asistanı</h1>", unsafe_allow_html=True)
+st.markdown(f"<p style='text-align: center; font-size: 1.1em; color: {TEXT_COLOR_MAIN};'>Ben Nexa. Yusuf'un teknik yetkinlikleri ve projeleri hakkında her şeyi bana sorabilirsin.</p>", unsafe_allow_html=True)
 st.divider()
 
 # --- YAN MENÜ ---
@@ -100,26 +72,24 @@ with st.sidebar:
     st.write("📍 Kalıp Tasarımcısı & Teknik Ressam")
     st.write("🏢 Farplas")
     st.divider()
-    
     st.write("### 📬 İletişim")
     st.write("📧 yca4134@gmail.com")
     st.link_button("LinkedIn Profiline Git", "https://www.linkedin.com/in/yusuf-can-ayd%C4%B1n-138389194")
-    
-    st.divider()
-    st.info("Bu asistan, özel renk paletiyle tasarlanmıştır.")
 
-# --- GEMINI AYARLARI ---
+# --- GEMINI MODEL AYARLARI ---
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 except:
-    st.error("⚠️ API Anahtarı bulunamadı! Lütfen Streamlit ayarlarından ekleyin.")
+    st.error("⚠️ API Anahtarı bulunamadı!")
     st.stop()
 
+# İsim burada da güncellendi: "Nexa"
 system_prompt = """
 Sen Yusuf Can Aydın'ın kişisel web sitesindeki yapay zeka asistanısın. Adın "YCA Bot".
+İsmin Siemens NX yazılımına ve teknolojiye bir göndermedir.
 Ziyaretçiler sana Yusuf'un kariyeri, projeleri ve yetenekleri hakkında sorular soracak.
 Senin görevin, Yusuf'u profesyonel, yetkin ve samimi bir dille temsil etmektir.
-Biri sana 'Merhaba' derse kendini tanıt.
+Biri sana 'Merhaba' derse kendini "Ben Nexa, Yusuf'un dijital asistanıyım" diye tanıt.
 
 BİLGİ BANKASI:
 [GENEL]
@@ -147,36 +117,47 @@ model = genai.GenerativeModel(
     system_instruction=system_prompt
 )
 
+# --- KLAVYE EFEKTİ FONKSİYONU ---
+def stream_data(text):
+    for word in text.split(" "):
+        yield word + " "
+        time.sleep(0.05) # Yazma hızı (Düşürürsen hızlanır)
+
 # --- SOHBET ARAYÜZÜ ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Mesajları göster
+# Geçmiş mesajları göster
 for message in st.session_state.messages:
     avatar = "🧑‍💻" if message["role"] == "user" else "🌿"
     with st.chat_message(message["role"], avatar=avatar):
         st.write(message["content"])
 
-# Kullanıcı Girişi
-if user_input := st.chat_input("Sorunu buraya yaz..."):
-    # Mesajı ekle ve göster
+# KULLANICI GİRİŞİ VE CEVAP ALANI
+if user_input := st.chat_input("Nexa'ya sor... (Örn: Yusuf hangi programları kullanıyor?)"):
+    
+    # 1. Kullanıcı mesajını ekle
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user", avatar="🧑‍💻"):
         st.write(user_input)
 
-    # Cevabı üret
+    # 2. Cevabı üret ve KLAVYE EFEKTİYLE yaz
     try:
+        # Sohbet geçmişini modele ver
         chat = model.start_chat(history=[
             {"role": m["role"], "parts": [m["content"]]} 
             for m in st.session_state.messages[:-1]
         ])
+        
         response = chat.send_message(user_input)
         ai_response = response.text
 
-        # Cevabı göster
+        # BURASI SİHİRLİ KISIM (Klavye Efekti)
         with st.chat_message("assistant", avatar="🌿"):
-            st.write(ai_response)
+            # st.write_stream, metni parça parça ekrana basar
+            st.write_stream(stream_data(ai_response))
         
+        # Cevabı hafızaya kaydet
         st.session_state.messages.append({"role": "model", "content": ai_response})
         
     except Exception as e:
